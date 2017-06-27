@@ -10,6 +10,7 @@ PImage rickDrool;
 PImage mortyHair;
 PImage mortyMouth;
 PImage showMeWhatYouGot;
+PImage[] drools = new PImage[8];
 
 PImage currentHair;
 PImage currentMouth;
@@ -23,12 +24,14 @@ boolean hoverRickButton = false;
 boolean hoverMortyButton = false;
 boolean hoverShowmewhatyougotButton = false;
 boolean hoverScreenCapButton = false;
+boolean hasMouthAnimation = false;
 
 int savedMessageStartTimeMillis = 0;
 int savedMessageDuration = 2500;
 
 int width = 640;
 int height = 480;
+int droolCount = 0;
 
 void setup() {
   size(640, 480);
@@ -47,6 +50,9 @@ void setup() {
   
   currentHair = rickHair;
   currentMouth = rickDrool;
+  hasMouthAnimation = true;
+  
+  getDroolsImgs();
   
   video.start();
 }
@@ -82,14 +88,17 @@ void mousePressed() {
   if (hoverRickButton) {
     currentHair = rickHair;
     currentMouth = rickDrool;
+    hasMouthAnimation = true;
   }
   if (hoverMortyButton) {
     currentHair = mortyHair;
     currentMouth = mortyMouth;
+    hasMouthAnimation = false;
   }
   if (hoverShowmewhatyougotButton) {
     currentHair = showMeWhatYouGot;
     currentMouth = null;
+    hasMouthAnimation = false;
   }
   if (hoverScreenCapButton) {
     String filename = year() + "-" + month() + "-" + day() + "-" + hour() + "-" + minute() + "-" + second();
@@ -117,6 +126,17 @@ void draw() {
     Rectangle[] mouths = opencvMouth.detect();
     for (int i = 0; i < mouths.length; i++) {
       if (isMouth(faces, mouths[i])) {
+        if (hasMouthAnimation) {
+          currentMouth = drools[droolCount];
+          droolCount++;
+          if (droolCount >= drools.length) {
+            droolCount = 0;
+          }
+          
+          println(drools.length);
+          println(droolCount);
+        } 
+        
         drawMouth(mouths[i].x, mouths[i].y, mouths[i].width, mouths[i].height, currentMouth);
       }
     }
@@ -242,6 +262,12 @@ void drawMouth(int x, int y, int faceWidth, int faceHeight, PImage mouth) {
   float drawY = y - (heightDiff / 2) - heightOffset;
 
   image(mouth, drawX, drawY, width, height);
+}
+
+void getDroolsImgs() {
+  for (int i = 0; i < drools.length; i++) {
+    drools[i] = loadImage("images/drool_animation/rick_drool_0"+(i+1)+".png");
+  }
 }
 
 void captureEvent(Capture c) {
