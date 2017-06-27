@@ -30,11 +30,17 @@ void draw() {
 
   image(video, 0, 0);
   
+  noFill();
+  stroke(0, 255, 0);
+  strokeWeight(3);
+  
   // Detect and draw faces
   Rectangle[] faces = opencvFrontalFace.detect();
   for (int i = 0; i < faces.length; i++) {
      drawHair(faces[i].x, faces[i].y, faces[i].width, faces[i].height);
   }
+  
+  stroke(255, 255, 0);
   
   // Detect and draw drool on mouths
   Rectangle[] mouths = opencvMouth.detect();
@@ -46,20 +52,33 @@ void draw() {
 }
 
 boolean isMouth(Rectangle[] faces, Rectangle mouth) {
-  int mouthTopX = mouth.x;
-  int mouthTopY = mouth.x;
-  int mouthBottomX = mouthTopX + mouth.width;
-  int mouthBottomY = mouthTopY + mouth.height;
+  int mouthTopLeftX = mouth.x;
+  int mouthTopLeftY = mouth.y;
+  int mouthTopRightX = mouth.x + mouth.width;
+  int mouthTopRightY = mouth.y;
   
   for (int i = 0; i < faces.length; i++) {
-    int faceTopX = faces[i].x;
-    int faceTopY = faces[i].y + (faces[i].height / 3); // Bottom third of the face
-    int faceBottomX = faceTopX + faces[i].width;
-    int faceBottomY = faceTopY + faces[i].height;
+    int height = faces[i].height;
+    int width = faces[i].width;
     
-    // If the mouth is in a face rectangle
-    if (mouthTopX > faceTopX && mouthTopY > faceTopY && mouthBottomX < faceBottomX && mouthBottomY < faceBottomY) {
-     return true; 
+    int faceTopLeftX = faces[i].x;
+    int faceTopLeftY = faces[i].y + ((height / 3) * 2); // Bottom third of the face
+    
+    int faceTopRightX = faceTopLeftX + width;
+    int faceTopRightY = faceTopLeftY;
+    
+    int faceBottomLeftX = faceTopLeftX;
+    int faceBottomLeftY = faceTopLeftY + (height / 3);
+    
+    int faceBottomRightX = faceBottomLeftX + width;
+    int faceBottomRightY = faceBottomLeftY;
+
+    if(
+      (mouthTopLeftY > faceTopLeftY && mouthTopLeftY < faceBottomLeftY)
+      && (mouthTopLeftX > faceTopLeftX && mouthTopLeftX < faceTopRightX)
+      && (mouthTopRightX > faceTopLeftX && mouthTopRightX < faceTopRightX)
+    ) {
+      return true; 
     }
   }
   
@@ -85,8 +104,8 @@ void drawHair(int x, int y, int faceWidth, int faceHeight) {
 }
 
 void drawDrool(int x, int y, int faceWidth, int faceHeight) {
-  float widthFactor = 1.5;
-  float heightFactor = 1.5;
+  float widthFactor = 1.8;
+  float heightFactor = 1.8;
   
   float width = faceWidth * widthFactor;
   float height = faceHeight * heightFactor;
