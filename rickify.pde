@@ -9,34 +9,44 @@ PImage rickHair;
 PImage rickDrool;
 PImage mortyHair;
 PImage mortyMouth;
+PImage showMeWhatYouGot;
 
 PImage currentHair;
 PImage currentMouth;
 
-int rectSize = 40;
+int rectSize = 30;
 int rectColorFill = color(200, 200, 200);
 int rectColorFillHover = color(220, 220, 220);
 int rectColorBorder = color(100, 100, 100);
 
 boolean hoverRickButton = false;
 boolean hoverMortyButton = false;
+boolean hoverShowmewhatyougotButton = false;
+boolean hoverScreenCapButton = false;
+
+int savedMessageStartTimeMillis = 0;
+int savedMessageDuration = 2500;
+
+int width = 640;
+int height = 480;
 
 void setup() {
   size(640, 480);
-  video = new Capture(this, 640/2, 480/2);
-  opencvFrontalFace = new OpenCV(this, 640/2, 480/2);
+  video = new Capture(this, width/2, height/2);
+  opencvFrontalFace = new OpenCV(this, width/2, height/2);
   opencvFrontalFace.loadCascade(OpenCV.CASCADE_FRONTALFACE);
   
   opencvMouth = new OpenCV(this, 640/2, 480/2);
   opencvMouth.loadCascade(OpenCV.CASCADE_MOUTH);
-
-  rickHair = loadImage("rick_hair.png");
-  rickDrool = loadImage("rick_drool.png");
-  mortyHair = loadImage("morty_hair.png");
-  mortyMouth = loadImage("morty_mouth.png");
   
-  currentHair = mortyHair;
-  currentMouth = mortyMouth;
+  mortyHair = loadImage("images/morty_hair.png");
+  mortyMouth = loadImage("images/morty_mouth.png");
+  rickHair = loadImage("images/rick_hair.png");
+  rickDrool = loadImage("images/rick_drool.png");
+  showMeWhatYouGot = loadImage("images/show_me_what_you_got.png");
+  
+  currentHair = rickHair;
+  currentMouth = rickDrool;
   
   video.start();
 }
@@ -45,15 +55,30 @@ void update(int x, int y) {
   if (x > 0 && y > 0 && x <= rectSize && y <= rectSize) {
     hoverRickButton = true;
     hoverMortyButton = false;
+    hoverShowmewhatyougotButton = false;
+    hoverScreenCapButton = false;
   } else if (x > rectSize && y > 0 && x <= rectSize * 2 && y <= rectSize) {
     hoverRickButton = false;
     hoverMortyButton = true;
+    hoverShowmewhatyougotButton = false;
+    hoverScreenCapButton = false;
+  } else if (x > rectSize * 2 && y > 0 && x <= rectSize * 3 && y <= rectSize) {
+    hoverRickButton = false;
+    hoverMortyButton = false;
+    hoverShowmewhatyougotButton = true;
+    hoverScreenCapButton = false;
+  } else if (x > rectSize * 3 && y > 0 && x <= rectSize * 4 && y <= rectSize) {
+    hoverRickButton = false;
+    hoverMortyButton = false;
+    hoverShowmewhatyougotButton = false;
+    hoverScreenCapButton = true;    
   } else {
-    hoverRickButton = hoverMortyButton = false;
+    hoverRickButton = hoverMortyButton = hoverScreenCapButton = hoverShowmewhatyougotButton = false;
   }
 }
 
 void mousePressed() {
+  println("Mouse pressed");
   if (hoverRickButton) {
     currentHair = rickHair;
     currentMouth = rickDrool;
@@ -61,6 +86,16 @@ void mousePressed() {
   if (hoverMortyButton) {
     currentHair = mortyHair;
     currentMouth = mortyMouth;
+  }
+  if (hoverShowmewhatyougotButton) {
+    currentHair = showMeWhatYouGot;
+    currentMouth = null;
+  }
+  if (hoverScreenCapButton) {
+    String filename = year() + "-" + month() + "-" + day() + "-" + hour() + "-" + minute() + "-" + second();
+    save("screencaps/" + filename + ".jpg");
+    savedMessageStartTimeMillis = millis();
+    
   }
 }
 
@@ -77,18 +112,33 @@ void draw() {
      drawHair(faces[i].x, faces[i].y, faces[i].width, faces[i].height, currentHair);
   }
   
-  // Detect and draw drool on mouths
-  Rectangle[] mouths = opencvMouth.detect();
-  for (int i = 0; i < mouths.length; i++) {
-    if (isMouth(faces, mouths[i])) {
-      drawMouth(mouths[i].x, mouths[i].y, mouths[i].width, mouths[i].height, currentMouth);
+  if (currentMouth != null) {
+    // Detect and draw drool on mouths
+    Rectangle[] mouths = opencvMouth.detect();
+    for (int i = 0; i < mouths.length; i++) {
+      if (isMouth(faces, mouths[i])) {
+        drawMouth(mouths[i].x, mouths[i].y, mouths[i].width, mouths[i].height, currentMouth);
+      }
     }
   }
 
   update(mouseX / 2, mouseY / 2);
 
+  // Buttons
   drawRickButton();
   drawMortyButton();
+  drawShowmewhatyougotButton();
+  drawScreenCapButton();
+  
+  // "Saved" message
+  if ((savedMessageStartTimeMillis + savedMessageDuration) > millis()) {
+    strokeWeight(0);
+    fill(color(200, 200, 200));
+    rect(0, rectSize, 200, 20);
+    
+    fill(color(0, 0, 0));
+    text("Saved photo to folder \"screencaps\"", 5, rectSize + 15); 
+  }
 }
 
 void drawRickButton() {
@@ -97,6 +147,14 @@ void drawRickButton() {
 
 void drawMortyButton() {
   drawButton(rectSize, 0, mortyHair, hoverMortyButton);
+}
+
+void drawShowmewhatyougotButton() {
+  drawButton(rectSize * 2, 0, showMeWhatYouGot, hoverShowmewhatyougotButton);
+}
+
+void drawScreenCapButton() {
+  drawButton(rectSize * 3, 0, loadImage("images/camera-icon.png"), hoverScreenCapButton);
 }
 
 void drawButton(int x, int y, PImage image, boolean hovering) {
