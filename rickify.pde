@@ -11,6 +11,7 @@ PImage mortyHair;
 PImage mortyMouth;
 PImage showMeWhatYouGot;
 PImage[] drools = new PImage[10];
+PImage meeseeks;
 
 PImage currentHair;
 PImage currentMouth;
@@ -23,6 +24,7 @@ int rectColorBorder = color(100, 100, 100);
 boolean hoverRickButton = false;
 boolean hoverMortyButton = false;
 boolean hoverShowmewhatyougotButton = false;
+boolean hoverMeeseeksButton = false;
 boolean hoverScreenCapButton = false;
 boolean hasMouthAnimation = false;
 
@@ -47,6 +49,7 @@ void setup() {
   rickHair = loadImage("images/rick_hair.png");
   rickDrool = loadImage("images/rick_drool.png");
   showMeWhatYouGot = loadImage("images/show_me_what_you_got.png");
+  meeseeks = loadImage("images/meeseeks.png");
   
   currentHair = rickHair;
   currentMouth = rickDrool;
@@ -62,29 +65,38 @@ void update(int x, int y) {
     hoverRickButton = true;
     hoverMortyButton = false;
     hoverShowmewhatyougotButton = false;
+    hoverMeeseeksButton = false;
     hoverScreenCapButton = false;
   } else if (x > rectSize && y > 0 && x <= rectSize * 2 && y <= rectSize) {
     hoverRickButton = false;
     hoverMortyButton = true;
     hoverShowmewhatyougotButton = false;
+    hoverMeeseeksButton = false;
     hoverScreenCapButton = false;
   } else if (x > rectSize * 2 && y > 0 && x <= rectSize * 3 && y <= rectSize) {
     hoverRickButton = false;
     hoverMortyButton = false;
     hoverShowmewhatyougotButton = true;
+    hoverMeeseeksButton = false;
     hoverScreenCapButton = false;
   } else if (x > rectSize * 3 && y > 0 && x <= rectSize * 4 && y <= rectSize) {
     hoverRickButton = false;
     hoverMortyButton = false;
     hoverShowmewhatyougotButton = false;
+    hoverMeeseeksButton = true;
+    hoverScreenCapButton = false;    
+  } else if (x > rectSize * 4 && y > 0 && x <= rectSize * 5 && y <= rectSize) {
+    hoverRickButton = false;
+    hoverMortyButton = false;
+    hoverShowmewhatyougotButton = false;
+    hoverMeeseeksButton = false;
     hoverScreenCapButton = true;    
   } else {
-    hoverRickButton = hoverMortyButton = hoverScreenCapButton = hoverShowmewhatyougotButton = false;
+    hoverRickButton = hoverMortyButton = hoverScreenCapButton = hoverShowmewhatyougotButton = hoverMeeseeksButton = false;
   }
 }
 
 void mousePressed() {
-  println("Mouse pressed");
   if (hoverRickButton) {
     currentHair = rickHair;
     currentMouth = rickDrool;
@@ -97,6 +109,11 @@ void mousePressed() {
   }
   if (hoverShowmewhatyougotButton) {
     currentHair = showMeWhatYouGot;
+    currentMouth = null;
+    hasMouthAnimation = false;
+  }
+  if (hoverMeeseeksButton) {
+    currentHair = meeseeks;
     currentMouth = null;
     hasMouthAnimation = false;
   }
@@ -145,6 +162,7 @@ void draw() {
   drawRickButton();
   drawMortyButton();
   drawShowmewhatyougotButton();
+  drawMeeseeksButton();
   drawScreenCapButton();
   
   // "Saved" message
@@ -170,8 +188,12 @@ void drawShowmewhatyougotButton() {
   drawButton(rectSize * 2, 0, showMeWhatYouGot, hoverShowmewhatyougotButton);
 }
 
+void drawMeeseeksButton() {
+  drawButton(rectSize * 3, 0, meeseeks, hoverMeeseeksButton);
+}
+
 void drawScreenCapButton() {
-  drawButton(rectSize * 3, 0, loadImage("images/camera-icon.png"), hoverScreenCapButton);
+  drawButton(rectSize * 4, 0, loadImage("images/camera-icon.png"), hoverScreenCapButton);
 }
 
 void drawButton(int x, int y, PImage image, boolean hovering) {
@@ -211,7 +233,7 @@ boolean isMouth(Rectangle[] faces, Rectangle mouth) {
     
     int faceTopRightX = faceTopLeftX + width;
 
-    int faceBottomLeftY = faceTopLeftY + (height / 3);
+    float faceBottomLeftY = faceTopLeftY + (height / 5);
 
     if(
       (mouthTopLeftY > faceTopLeftY && mouthTopLeftY < faceBottomLeftY)
@@ -231,16 +253,20 @@ void drawHair(int x, int y, int faceWidth, int faceHeight, PImage hair) {
   
   float width = faceWidth * widthFactor;
   float height = faceHeight * heightFactor;
+
+  float scaleFactor = hair.height / height;
+  float widthScaled = hair.width / scaleFactor;
   
   float heightOffset = height / 8;
+  float widthOffset = width / 20;
   
-  float widthDiff = width - faceWidth;
+  float widthDiff = abs(width - widthScaled);
   float heightDiff = height - faceHeight;
   
-  float drawX = x - (widthDiff / 2);
+  float drawX = x - (widthDiff / 2) - widthOffset;
   float drawY = y - (heightDiff / 2) - heightOffset;
 
-  image(hair, drawX, drawY, width, height);
+  image(hair, drawX, drawY, widthScaled, height);
 }
 
 void drawMouth(int x, int y, int faceWidth, int faceHeight, PImage mouth) {
