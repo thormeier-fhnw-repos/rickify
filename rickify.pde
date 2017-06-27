@@ -17,6 +17,7 @@ PImage currentHair;
 PImage currentMouth;
 
 int rectSize = 30;
+int rectBorderSize = 2;
 int rectColorFill = color(200, 200, 200);
 int rectColorFillHover = color(220, 220, 220);
 int rectColorBorder = color(100, 100, 100);
@@ -204,7 +205,7 @@ void drawButton(int x, int y, PImage image, boolean hovering) {
     fill(rectColorFill);
   }
   stroke(rectColorBorder);
-  strokeWeight(2);
+  strokeWeight(rectBorderSize);
   rect(x, y, rectSize, rectSize);
   
   // Fit width and height to be in the button
@@ -216,7 +217,7 @@ void drawButton(int x, int y, PImage image, boolean hovering) {
   int fitY = y + (rectSize - fitHeight) / 2;
   
   // Display image on button
-  image(image, fitX, fitY, fitWidth, fitHeight);
+  image(image, fitX + rectBorderSize, fitY + rectBorderSize, fitWidth - (rectBorderSize * 2), fitHeight - (rectBorderSize * 2));
 }
 
 boolean isMouth(Rectangle[] faces, Rectangle mouth) {
