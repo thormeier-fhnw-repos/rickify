@@ -10,7 +10,7 @@ PImage rickDrool;
 PImage mortyHair;
 PImage mortyMouth;
 PImage showMeWhatYouGot;
-PImage[] drools = new PImage[8];
+PImage[] drools = new PImage[10];
 
 PImage currentHair;
 PImage currentMouth;
@@ -132,9 +132,6 @@ void draw() {
           if (droolCount >= drools.length) {
             droolCount = 0;
           }
-          
-          println(drools.length);
-          println(droolCount);
         } 
         
         drawMouth(mouths[i].x, mouths[i].y, mouths[i].width, mouths[i].height, currentMouth);
@@ -266,7 +263,7 @@ void drawMouth(int x, int y, int faceWidth, int faceHeight, PImage mouth) {
 
 void getDroolsImgs() {
   for (int i = 0; i < drools.length; i++) {
-    drools[i] = loadImage("images/drool_animation/rick_drool_0"+(i+1)+".png");
+    drools[i] = loadImage("images/drool_animation/rick_drool_"+i+".png");
   }
 }
 
